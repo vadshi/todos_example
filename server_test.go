@@ -4,21 +4,27 @@ import (
 	"bytes"
 	"encoding/json"
 	"io"
+	"net"
 	"net/http"
+	"net/http/httptest"
 	"testing"
-
-	"github.com/wundergraph/graphql-go-tools/pkg/graphql"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/wundergraph/graphql-go-tools/pkg/graphql"
 )
 
 var httpClient *http.Client
 var expectedNewTodo = `{"createTodo":{"user":{"id":"1"},"text":"todo","done":false}}`
 var expectedTodos = `{"todos":[{"text":"todo","done":false,"user":{"name":"user 1"}}]}`
+var URL = "localhost:" + defaultPort
 
 func TestMainFunc(t *testing.T) {
-	go main()
-
+	router := NewRouter()
+	ts := httptest.NewUnstartedServer(router)
+	l, _ := net.Listen("tcp", URL)
+	ts.Listener = l
+	ts.Start()
+	defer ts.Close()
 
 	t.Run("should create new todo", func(t *testing.T) {
 		gqlReqBody := graphql.Request{
