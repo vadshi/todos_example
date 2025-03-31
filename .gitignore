@@ -22,4 +22,5 @@
 .vscode/
 .idea/
 
-tmp/
+tmp/# Added by goreleaser init:
+dist/
